@@ -501,3 +501,35 @@ a:hover { text-decoration: underline; }
   .nav-tabs       { overflow-x: auto; }
   .contact-grid   { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── ADMIN BUTTON ── */
+.admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-400);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.admin-btn:hover  { color: var(--gray-800); border-color: var(--gray-400); }
+.admin-btn.active { color: var(--accent); border-color: var(--accent); background: var(--purple-bg); }
+.admin-btn span   { display: none; }
+.admin-btn.active span { display: inline; }
+
+/* ── ADMIN BANNER ── */
+.admin-banner {
+  background: var(--purple-bg);
+  border-bottom: 1px solid var(--purple-border);
+  color: var(--purple-text);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px;
+}

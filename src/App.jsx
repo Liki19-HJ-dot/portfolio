@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 
 /* ─────────────────────────────────────────────
-   DEFAULT DATA  –  edit anything here to
-   customise your portfolio
+   🔐 CHANGE THIS PASSWORD TO YOUR OWN SECRET
+───────────────────────────────────────────── */
+const ADMIN_PASSWORD = "likhith@2024";
+
+/* ─────────────────────────────────────────────
+   DEFAULT DATA
 ───────────────────────────────────────────── */
 const DEFAULT_PROFILE = {
   name: "Likhith H J",
@@ -89,9 +93,6 @@ const DEFAULT_PROJECTS = [
   },
 ];
 
-/* ─────────────────────────────────────────────
-   COLOUR SYSTEM
-───────────────────────────────────────────── */
 const COLORS = ["purple", "teal", "coral", "blue", "pink", "amber"];
 const CM = {
   purple: { bg: "#EEEDFE", border: "#534AB7", text: "#3C3489" },
@@ -102,38 +103,25 @@ const CM = {
   amber:  { bg: "#FAEEDA", border: "#854F0B", text: "#633806" },
 };
 
+const STORAGE_PROFILE  = "lhj_portfolio_profile";
+const STORAGE_PROJECTS = "lhj_portfolio_projects";
+const STORAGE_ADMIN    = "lhj_admin_session";
+
 /* ─────────────────────────────────────────────
-   SMALL REUSABLE COMPONENTS
+   SMALL COMPONENTS
 ───────────────────────────────────────────── */
 function Avatar({ profile, size = 80 }) {
   const [err, setErr] = useState(false);
-  const initials = profile.name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
+  const initials = profile.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   if (profile.avatar && !err) {
     return (
-      <img
-        src={profile.avatar}
-        alt={profile.name}
-        onError={() => setErr(true)}
-        style={{
-          width: size, height: size, borderRadius: "50%",
-          objectFit: "cover", border: "2px solid #534AB7",
-        }}
-      />
+      <img src={profile.avatar} alt={profile.name} onError={() => setErr(true)}
+        style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", border: "2px solid #534AB7" }} />
     );
   }
   return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%",
-      background: "#EEEDFE", border: "2px solid #534AB7",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: size * 0.32, fontWeight: 500, color: "#3C3489",
-    }}>
+    <div style={{ width: size, height: size, borderRadius: "50%", background: "#EEEDFE", border: "2px solid #534AB7",
+      display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.32, fontWeight: 500, color: "#3C3489" }}>
       {initials}
     </div>
   );
@@ -142,29 +130,21 @@ function Avatar({ profile, size = 80 }) {
 function Badge({ label, color = "purple" }) {
   const c = CM[color] || CM.purple;
   return (
-    <span style={{
-      background: c.bg, color: c.text, border: `1px solid ${c.border}`,
-      fontSize: 11, fontWeight: 500, padding: "2px 9px",
-      borderRadius: 6, display: "inline-block",
-    }}>
+    <span style={{ background: c.bg, color: c.text, border: `1px solid ${c.border}`,
+      fontSize: 11, fontWeight: 500, padding: "2px 9px", borderRadius: 6, display: "inline-block" }}>
       {label}
     </span>
   );
 }
 
 function Modal({ title, onClose, children }) {
-  /* close on Escape */
   useEffect(() => {
     const handler = (ev) => ev.key === "Escape" && onClose();
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
-
   return (
-    <div
-      className="modal-overlay"
-      onClick={(ev) => ev.target === ev.currentTarget && onClose()}
-    >
+    <div className="modal-overlay" onClick={(ev) => ev.target === ev.currentTarget && onClose()}>
       <div className="modal-box">
         <div className="modal-header">
           <h2>{title}</h2>
@@ -180,101 +160,27 @@ function Field({ label, value, onChange, placeholder, type = "text", multi }) {
   return (
     <div className="field">
       {label && <label>{label}</label>}
-      {multi ? (
-        <textarea
-          value={value}
-          onChange={(ev) => onChange(ev.target.value)}
-          placeholder={placeholder}
-          rows={3}
-        />
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(ev) => onChange(ev.target.value)}
-          placeholder={placeholder}
-        />
-      )}
+      {multi
+        ? <textarea value={value} onChange={(ev) => onChange(ev.target.value)} placeholder={placeholder} rows={3} />
+        : <input type={type} value={value} onChange={(ev) => onChange(ev.target.value)} placeholder={placeholder} />}
     </div>
   );
 }
 
 function Btn({ children, onClick, primary, className = "", style: s }) {
   return (
-    <button
-      onClick={onClick}
-      className={`btn ${primary ? "btn-primary" : ""} ${className}`}
-      style={s}
-    >
+    <button onClick={onClick} className={`btn ${primary ? "btn-primary" : ""} ${className}`} style={s}>
       {children}
     </button>
   );
 }
 
 /* ─────────────────────────────────────────────
-   PROJECT CARD
+   SVG ICONS
 ───────────────────────────────────────────── */
-function ProjectCard({ proj, onEdit, onDelete, compact }) {
-  const c = CM[proj.color] || CM.purple;
-  return (
-    <div className="project-card" style={{ borderTop: `2px solid ${c.border}` }}>
-      <div className="project-card-inner">
-        <div className="project-card-body">
-          <div className="project-name">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke={c.border} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              aria-hidden="true">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-            </svg>
-            <span style={{ color: c.text }}>{proj.name}</span>
-          </div>
-
-          <p className={`project-desc ${compact ? "clamp" : ""}`}>
-            {proj.description}
-          </p>
-
-          <div className="badge-row">
-            {(proj.tech || []).map((t) => (
-              <Badge key={t} label={t} color={proj.color || "purple"} />
-            ))}
-          </div>
-
-          <div className="project-links">
-            {proj.github && (
-              <a href={proj.github} target="_blank" rel="noreferrer" className="project-link">
-                <GithubIcon /> GitHub
-              </a>
-            )}
-            {proj.live && (
-              <a href={proj.live} target="_blank" rel="noreferrer" className="project-link accent">
-                <ExternalIcon /> Live demo
-              </a>
-            )}
-          </div>
-        </div>
-
-        {!compact && (
-          <div className="project-actions">
-            <button onClick={onEdit} className="icon-btn" title="Edit">
-              <EditIcon />
-            </button>
-            <button onClick={onDelete} className="icon-btn danger" title="Delete">
-              <TrashIcon />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   INLINE SVG ICONS  (no external dependency)
-───────────────────────────────────────────── */
-const icon = (d, vb = "0 0 24 24") => (
-  <svg width="16" height="16" viewBox={vb} fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-    aria-hidden="true">
+const icon = (d) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d={d} />
   </svg>
 );
@@ -293,10 +199,9 @@ const HomeIcon     = () => icon("M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z 
 const FolderIcon   = () => icon("M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z");
 const BoltIcon     = () => icon("M13 2L3 14h9l-1 8 10-12h-9l1-8z");
 const CodeIcon     = () => icon("M16 18l6-6-6-6 M8 6l-6 6 6 6");
+const LockIcon     = () => icon("M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 10 0v4");
+const UnlockIcon   = () => icon("M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 9.9-1");
 
-/* ─────────────────────────────────────────────
-   SOCIAL ICON MAP
-───────────────────────────────────────────── */
 const SOCIAL_ICONS = {
   github:    { icon: <GithubIcon />,   label: "GitHub" },
   linkedin:  { icon: <LinkedinIcon />, label: "LinkedIn" },
@@ -305,43 +210,132 @@ const SOCIAL_ICONS = {
 };
 
 /* ─────────────────────────────────────────────
-   STORAGE KEY
+   PROJECT CARD
 ───────────────────────────────────────────── */
-const STORAGE_PROFILE  = "lhj_portfolio_profile";
-const STORAGE_PROJECTS = "lhj_portfolio_projects";
+function ProjectCard({ proj, onEdit, onDelete, compact, isAdmin }) {
+  const c = CM[proj.color] || CM.purple;
+  return (
+    <div className="project-card" style={{ borderTop: `2px solid ${c.border}` }}>
+      <div className="project-card-inner">
+        <div className="project-card-body">
+          <div className="project-name">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke={c.border} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span style={{ color: c.text }}>{proj.name}</span>
+          </div>
+          <p className={`project-desc ${compact ? "clamp" : ""}`}>{proj.description}</p>
+          <div className="badge-row">
+            {(proj.tech || []).map((t) => <Badge key={t} label={t} color={proj.color || "purple"} />)}
+          </div>
+          <div className="project-links">
+            {proj.github && (
+              <a href={proj.github} target="_blank" rel="noreferrer" className="project-link">
+                <GithubIcon /> GitHub
+              </a>
+            )}
+            {proj.live && (
+              <a href={proj.live} target="_blank" rel="noreferrer" className="project-link accent">
+                <ExternalIcon /> Live demo
+              </a>
+            )}
+          </div>
+        </div>
+        {/* Only show edit/delete if admin and not compact */}
+        {isAdmin && !compact && (
+          <div className="project-actions">
+            <button onClick={onEdit} className="icon-btn" title="Edit"><EditIcon /></button>
+            <button onClick={onDelete} className="icon-btn danger" title="Delete"><TrashIcon /></button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   ADMIN LOGIN MODAL
+───────────────────────────────────────────── */
+function LoginModal({ onClose, onSuccess }) {
+  const [pw, setPw] = useState("");
+  const [err, setErr] = useState(false);
+
+  const attempt = () => {
+    if (pw === ADMIN_PASSWORD) {
+      onSuccess();
+    } else {
+      setErr(true);
+      setPw("");
+    }
+  };
+
+  return (
+    <Modal title="Admin login" onClose={onClose}>
+      <p style={{ fontSize: 13, color: "#4b5563", marginBottom: "1rem" }}>
+        Enter your password to access edit mode.
+      </p>
+      <Field
+        label="Password"
+        type="password"
+        value={pw}
+        onChange={(v) => { setPw(v); setErr(false); }}
+        placeholder="Enter admin password"
+      />
+      {err && (
+        <p style={{ color: "#dc2626", fontSize: 12, marginTop: -8, marginBottom: 8 }}>
+          ❌ Wrong password. Try again.
+        </p>
+      )}
+      <div className="modal-actions">
+        <Btn onClick={onClose}>Cancel</Btn>
+        <Btn primary onClick={attempt} style={{ opacity: !pw ? 0.5 : 1 }}>
+          <LockIcon /> Login
+        </Btn>
+      </div>
+    </Modal>
+  );
+}
 
 /* ─────────────────────────────────────────────
    MAIN APP
 ───────────────────────────────────────────── */
 export default function App() {
-  const [tab, setTab]         = useState("home");
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
+  const [tab, setTab]           = useState("home");
+  const [profile, setProfile]   = useState(DEFAULT_PROFILE);
   const [projects, setProjects] = useState(DEFAULT_PROJECTS);
+  const [isAdmin, setIsAdmin]   = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
-  /* modal states */
   const [editP,  setEditP]  = useState(false);
   const [addPr,  setAddPr]  = useState(false);
   const [editPr, setEditPr] = useState(null);
-
-  /* draft states */
   const [dp,  setDpRaw]  = useState(null);
   const [dpr, setDprRaw] = useState(null);
   const setDp  = (fn) => setDpRaw((p) => (typeof fn === "function" ? fn(p) : { ...p, ...fn }));
   const setDpr = (fn) => setDprRaw((p) => (typeof fn === "function" ? fn(p) : { ...p, ...fn }));
 
-  /* load from localStorage on mount */
   useEffect(() => {
     try {
-      const p = localStorage.getItem(STORAGE_PROFILE);
-      if (p) setProfile(JSON.parse(p));
-      const pr = localStorage.getItem(STORAGE_PROJECTS);
-      if (pr) setProjects(JSON.parse(pr));
+      const p  = localStorage.getItem(STORAGE_PROFILE);  if (p)  setProfile(JSON.parse(p));
+      const pr = localStorage.getItem(STORAGE_PROJECTS); if (pr) setProjects(JSON.parse(pr));
+      const ad = sessionStorage.getItem(STORAGE_ADMIN);  if (ad) setIsAdmin(true);
     } catch {}
   }, []);
 
+  const loginAsAdmin = () => {
+    setIsAdmin(true);
+    setShowLogin(false);
+    try { sessionStorage.setItem(STORAGE_ADMIN, "1"); } catch {}
+  };
+
+  const logout = () => {
+    setIsAdmin(false);
+    try { sessionStorage.removeItem(STORAGE_ADMIN); } catch {}
+  };
+
   const saveProfile = (data) => {
-    setProfile(data);
-    setEditP(false);
+    setProfile(data); setEditP(false);
     try { localStorage.setItem(STORAGE_PROFILE, JSON.stringify(data)); } catch {}
   };
 
@@ -349,9 +343,7 @@ export default function App() {
     const updated = proj.id
       ? projects.map((p) => (p.id === proj.id ? proj : p))
       : [...projects, { ...proj, id: Date.now() }];
-    setProjects(updated);
-    setAddPr(false);
-    setEditPr(null);
+    setProjects(updated); setAddPr(false); setEditPr(null);
     try { localStorage.setItem(STORAGE_PROJECTS, JSON.stringify(updated)); } catch {}
   };
 
@@ -376,19 +368,34 @@ export default function App() {
           <Avatar profile={profile} size={30} />
           <span>{profile.name}</span>
         </div>
-        <div className="nav-tabs">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`nav-tab ${tab === t.id ? "active" : ""}`}
-            >
-              {t.icon}
-              <span>{t.label}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="nav-tabs">
+            {tabs.map((t) => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`nav-tab ${tab === t.id ? "active" : ""}`}>
+                {t.icon}<span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+          {/* Admin toggle — small lock icon in corner */}
+          {isAdmin ? (
+            <button onClick={logout} className="admin-btn active" title="Exit admin mode">
+              <UnlockIcon /> <span>Admin</span>
             </button>
-          ))}
+          ) : (
+            <button onClick={() => setShowLogin(true)} className="admin-btn" title="Admin login">
+              <LockIcon />
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Admin mode banner */}
+      {isAdmin && (
+        <div className="admin-banner">
+          🔓 Admin mode — only you can see edit controls
+        </div>
+      )}
 
       {/* ── MAIN ── */}
       <main className="main">
@@ -396,7 +403,6 @@ export default function App() {
         {/* HOME */}
         {tab === "home" && (
           <div>
-            {/* Profile hero */}
             <div className="card profile-card">
               <Avatar profile={profile} size={80} />
               <div className="profile-info">
@@ -405,19 +411,18 @@ export default function App() {
                     <h1>{profile.name}</h1>
                     <p className="muted">{profile.title}</p>
                   </div>
-                  <Btn onClick={() => { setDpRaw({ ...profile }); setEditP(true); }}>
-                    <EditIcon /> Edit profile
-                  </Btn>
+                  {/* Only visible to admin */}
+                  {isAdmin && (
+                    <Btn onClick={() => { setDpRaw({ ...profile }); setEditP(true); }}>
+                      <EditIcon /> Edit profile
+                    </Btn>
+                  )}
                 </div>
                 <p className="bio">{profile.bio}</p>
                 <div className="meta-row">
-                  {profile.location && (
-                    <span><MapPinIcon /> {profile.location}</span>
-                  )}
-                  {profile.email && (
-                    <a href={`mailto:${profile.email}`}><MailIcon /> {profile.email}</a>
-                  )}
-                  {profile.website && (
+                  {profile.location && <span><MapPinIcon /> {profile.location}</span>}
+                  {profile.email    && <a href={`mailto:${profile.email}`}><MailIcon /> {profile.email}</a>}
+                  {profile.website  && (
                     <a href={profile.website} target="_blank" rel="noreferrer">
                       <GlobeIcon /> {profile.website.replace(/https?:\/\//, "")}
                     </a>
@@ -426,45 +431,32 @@ export default function App() {
               </div>
             </div>
 
-            {/* Social links */}
             <div className="social-row">
               {Object.entries(SOCIAL_ICONS).map(([key, { icon: SvgIcon, label }]) =>
                 profile.social?.[key] ? (
-                  <a
-                    key={key}
-                    href={profile.social[key]}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="social-link"
-                  >
+                  <a key={key} href={profile.social[key]} target="_blank" rel="noreferrer" className="social-link">
                     {SvgIcon} {label}
                   </a>
                 ) : null
               )}
             </div>
 
-            {/* Pinned projects */}
             <div className="section">
               <div className="section-header">
                 <h2>Pinned projects</h2>
-                <button className="text-btn" onClick={() => setTab("projects")}>
-                  View all →
-                </button>
+                <button className="text-btn" onClick={() => setTab("projects")}>View all →</button>
               </div>
               <div className="grid-2">
                 {projects.slice(0, 4).map((p) => (
-                  <ProjectCard key={p.id} proj={p} compact />
+                  <ProjectCard key={p.id} proj={p} compact isAdmin={isAdmin} />
                 ))}
               </div>
             </div>
 
-            {/* Skills */}
             <div className="skills-panel">
               <h2>Skills</h2>
               <div className="badge-row">
-                {profile.skills.map((s) => (
-                  <Badge key={s} label={s} color="purple" />
-                ))}
+                {profile.skills.map((s) => <Badge key={s} label={s} color="purple" />)}
               </div>
             </div>
           </div>
@@ -474,27 +466,21 @@ export default function App() {
         {tab === "projects" && (
           <div>
             <div className="section-header">
-              <h2>
-                <FolderIcon />{" "}
-                Projects{" "}
-                <span className="count">({projects.length})</span>
-              </h2>
-              <Btn
-                primary
-                onClick={() => {
+              <h2><FolderIcon /> Projects <span className="count">({projects.length})</span></h2>
+              {/* Only visible to admin */}
+              {isAdmin && (
+                <Btn primary onClick={() => {
                   setDprRaw({ name: "", description: "", tech: [], github: "", live: "", color: "purple" });
                   setAddPr(true);
-                }}
-              >
-                <PlusIcon /> Add project
-              </Btn>
+                }}>
+                  <PlusIcon /> Add project
+                </Btn>
+              )}
             </div>
-
             <div className="project-list">
               {projects.map((p) => (
                 <ProjectCard
-                  key={p.id}
-                  proj={p}
+                  key={p.id} proj={p} isAdmin={isAdmin}
                   onEdit={() => { setDprRaw({ ...p, tech: [...(p.tech || [])] }); setEditPr(p); }}
                   onDelete={() => deleteProject(p.id)}
                 />
@@ -502,7 +488,7 @@ export default function App() {
               {projects.length === 0 && (
                 <div className="empty-state">
                   <FolderIcon />
-                  <p>No projects yet. Add your first one!</p>
+                  <p>No projects yet. {isAdmin ? "Add your first one!" : ""}</p>
                 </div>
               )}
             </div>
@@ -514,20 +500,19 @@ export default function App() {
           <div>
             <div className="section-header">
               <h2>Skills & technologies</h2>
-              <Btn onClick={() => { setDpRaw({ ...profile }); setEditP(true); }}>
-                <EditIcon /> Edit
-              </Btn>
+              {/* Only visible to admin */}
+              {isAdmin && (
+                <Btn onClick={() => { setDpRaw({ ...profile }); setEditP(true); }}>
+                  <EditIcon /> Edit
+                </Btn>
+              )}
             </div>
             <div className="skills-grid">
               {profile.skills.map((s, i) => {
                 const col = COLORS[i % COLORS.length];
                 const c = CM[col];
                 return (
-                  <div
-                    key={s}
-                    className="skill-tile"
-                    style={{ background: c.bg, border: `1px solid ${c.border}` }}
-                  >
+                  <div key={s} className="skill-tile" style={{ background: c.bg, border: `1px solid ${c.border}` }}>
                     <CodeIcon />
                     <span style={{ color: c.text }}>{s}</span>
                   </div>
@@ -550,46 +535,38 @@ export default function App() {
                 { label: "Instagram",   icon: <InstaIcon />,    href: profile.social?.instagram,  value: "@likhith_jlv" },
                 { label: "Portfolio",   icon: <GlobeIcon />,    href: profile.website,            value: profile.website?.replace(/https?:\/\//, "") },
                 { label: "Location",    icon: <MapPinIcon />,   href: null,                       value: profile.location },
-              ]
-                .filter((c) => c.value)
-                .map((c) => (
-                  <div key={c.label} className="contact-card">
-                    <div className="contact-label">
-                      {c.icon}
-                      <span>{c.label}</span>
-                    </div>
-                    {c.href ? (
-                      <a href={c.href} target="_blank" rel="noreferrer" className="contact-value accent">
-                        {c.value}
-                      </a>
-                    ) : (
-                      <span className="contact-value">{c.value}</span>
-                    )}
-                  </div>
-                ))}
+              ].filter((c) => c.value).map((c) => (
+                <div key={c.label} className="contact-card">
+                  <div className="contact-label">{c.icon}<span>{c.label}</span></div>
+                  {c.href
+                    ? <a href={c.href} target="_blank" rel="noreferrer" className="contact-value accent">{c.value}</a>
+                    : <span className="contact-value">{c.value}</span>}
+                </div>
+              ))}
             </div>
           </div>
         )}
       </main>
 
+      {/* ── LOGIN MODAL ── */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} onSuccess={loginAsAdmin} />}
+
       {/* ── EDIT PROFILE MODAL ── */}
       {editP && dp && (
         <Modal title="Edit profile" onClose={() => setEditP(false)}>
-          <div className="avatar-center">
-            <Avatar profile={dp} size={60} />
-          </div>
-          <Field label="Avatar URL" value={dp.avatar || ""} onChange={(v) => setDp((p) => ({ ...p, avatar: v }))} placeholder="https://..." />
-          <Field label="Name" value={dp.name} onChange={(v) => setDp((p) => ({ ...p, name: v }))} />
-          <Field label="Title / role" value={dp.title} onChange={(v) => setDp((p) => ({ ...p, title: v }))} />
-          <Field label="Bio" value={dp.bio} onChange={(v) => setDp((p) => ({ ...p, bio: v }))} multi />
-          <Field label="Location" value={dp.location} onChange={(v) => setDp((p) => ({ ...p, location: v }))} />
-          <Field label="Email" value={dp.email || ""} onChange={(v) => setDp((p) => ({ ...p, email: v }))} type="email" />
-          <Field label="Website" value={dp.website || ""} onChange={(v) => setDp((p) => ({ ...p, website: v }))} />
+          <div className="avatar-center"><Avatar profile={dp} size={60} /></div>
+          <Field label="Avatar URL"    value={dp.avatar || ""}  onChange={(v) => setDp((p) => ({ ...p, avatar: v }))}   placeholder="https://..." />
+          <Field label="Name"          value={dp.name}          onChange={(v) => setDp((p) => ({ ...p, name: v }))} />
+          <Field label="Title / role"  value={dp.title}         onChange={(v) => setDp((p) => ({ ...p, title: v }))} />
+          <Field label="Bio"           value={dp.bio}           onChange={(v) => setDp((p) => ({ ...p, bio: v }))}       multi />
+          <Field label="Location"      value={dp.location}      onChange={(v) => setDp((p) => ({ ...p, location: v }))} />
+          <Field label="Email"         value={dp.email || ""}   onChange={(v) => setDp((p) => ({ ...p, email: v }))}    type="email" />
+          <Field label="Website"       value={dp.website || ""} onChange={(v) => setDp((p) => ({ ...p, website: v }))} />
           <hr className="divider" />
           <p className="section-label">SOCIAL LINKS</p>
-          <Field label="GitHub" value={dp.social?.github || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, github: v } }))} />
-          <Field label="LinkedIn" value={dp.social?.linkedin || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, linkedin: v } }))} />
-          <Field label="Twitter / X" value={dp.social?.twitter || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, twitter: v } }))} />
+          <Field label="GitHub"    value={dp.social?.github    || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, github:    v } }))} />
+          <Field label="LinkedIn"  value={dp.social?.linkedin  || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, linkedin:  v } }))} />
+          <Field label="Twitter/X" value={dp.social?.twitter   || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, twitter:   v } }))} />
           <Field label="Instagram" value={dp.social?.instagram || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, instagram: v } }))} />
           <hr className="divider" />
           <p className="section-label">SKILLS (comma separated)</p>
@@ -607,50 +584,31 @@ export default function App() {
 
       {/* ── ADD / EDIT PROJECT MODAL ── */}
       {(addPr || editPr) && dpr && (
-        <Modal
-          title={editPr ? "Edit project" : "Add new project"}
-          onClose={() => { setAddPr(false); setEditPr(null); }}
-        >
-          <Field label="Project name" value={dpr.name} onChange={(v) => setDpr((p) => ({ ...p, name: v }))} placeholder="My project" />
-          <Field label="Description" value={dpr.description} onChange={(v) => setDpr((p) => ({ ...p, description: v }))} multi />
-          <Field
-            label="Tech stack (comma separated)"
-            value={(dpr.tech || []).join(", ")}
-            onChange={(v) => setDpr((p) => ({ ...p, tech: v.split(",").map((s) => s.trim()).filter(Boolean) }))}
-            placeholder="React, Python, CSS"
-          />
-          <Field label="GitHub URL" value={dpr.github || ""} onChange={(v) => setDpr((p) => ({ ...p, github: v }))} />
-          <Field label="Live demo URL" value={dpr.live || ""} onChange={(v) => setDpr((p) => ({ ...p, live: v }))} />
-
+        <Modal title={editPr ? "Edit project" : "Add new project"}
+          onClose={() => { setAddPr(false); setEditPr(null); }}>
+          <Field label="Project name"             value={dpr.name}                       onChange={(v) => setDpr((p) => ({ ...p, name: v }))}        placeholder="My project" />
+          <Field label="Description"              value={dpr.description}                onChange={(v) => setDpr((p) => ({ ...p, description: v }))}  multi />
+          <Field label="Tech stack (comma sep.)"  value={(dpr.tech || []).join(", ")}    onChange={(v) => setDpr((p) => ({ ...p, tech: v.split(",").map((s) => s.trim()).filter(Boolean) }))} placeholder="React, Python, CSS" />
+          <Field label="GitHub URL"               value={dpr.github || ""}              onChange={(v) => setDpr((p) => ({ ...p, github: v }))} />
+          <Field label="Live demo URL"            value={dpr.live || ""}                onChange={(v) => setDpr((p) => ({ ...p, live: v }))} />
           <div className="field">
             <label>Card colour</label>
             <div className="color-row">
               {COLORS.map((col) => {
                 const c = CM[col];
                 return (
-                  <button
-                    key={col}
-                    onClick={() => setDpr((p) => ({ ...p, color: col }))}
-                    aria-label={col}
-                    className="color-dot"
-                    style={{
-                      background: c.bg,
+                  <button key={col} onClick={() => setDpr((p) => ({ ...p, color: col }))}
+                    aria-label={col} className="color-dot"
+                    style={{ background: c.bg,
                       border: dpr.color === col ? `2px solid ${c.border}` : `1px solid ${c.border}`,
-                      transform: dpr.color === col ? "scale(1.25)" : "scale(1)",
-                    }}
-                  />
+                      transform: dpr.color === col ? "scale(1.25)" : "scale(1)" }} />
                 );
               })}
             </div>
           </div>
-
           <div className="modal-actions">
             <Btn onClick={() => { setAddPr(false); setEditPr(null); }}>Cancel</Btn>
-            <Btn
-              primary
-              onClick={() => saveProject(dpr)}
-              style={{ opacity: !dpr.name?.trim() ? 0.5 : 1 }}
-            >
+            <Btn primary onClick={() => saveProject(dpr)} style={{ opacity: !dpr.name?.trim() ? 0.5 : 1 }}>
               {editPr ? "Save changes" : "Add project"}
             </Btn>
           </div>
