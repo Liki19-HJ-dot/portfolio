@@ -15,7 +15,7 @@ const DEFAULT_PROFILE = {
   avatar: "https://avatars.githubusercontent.com/u/174157562?v=4",
   location: "Bengaluru, India",
   email: "likhith627@gmail.com",
-  website: "http://portfiloweb.ccbp.tech",
+  website: "http://likhith-portfolios.netlify.app",
   phone: "+91 7619272287",
   social: {
     github: "https://github.com/Liki19-HJ-dot",
