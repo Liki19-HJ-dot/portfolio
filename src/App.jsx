@@ -15,12 +15,11 @@ const DEFAULT_PROFILE = {
   avatar: "https://avatars.githubusercontent.com/u/174157562?v=4",
   location: "Bengaluru, India",
   email: "likhith627@gmail.com",
-  website: "http://portfiloweb.ccbp.tech",
+  website: "http://likhithhj-portfolio.netlify.app",
+  phone: "+91 7619272287",
   social: {
     github: "https://github.com/Liki19-HJ-dot",
     linkedin: "https://www.linkedin.com/in/likhith-h-j-22aa74249",
-    twitter: "https://x.com/LikhithHJ19",
-    instagram: "https://www.instagram.com/likhith_jlv",
   },
   skills: [
     "Python", "HTML", "CSS", "SQL",
@@ -201,12 +200,11 @@ const BoltIcon     = () => icon("M13 2L3 14h9l-1 8 10-12h-9l1-8z");
 const CodeIcon     = () => icon("M16 18l6-6-6-6 M8 6l-6 6 6 6");
 const LockIcon     = () => icon("M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 10 0v4");
 const UnlockIcon   = () => icon("M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z M7 11V7a5 5 0 0 1 9.9-1");
+const PhoneIcon    = () => icon("M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.28h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.98-.98a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z");
 
 const SOCIAL_ICONS = {
-  github:    { icon: <GithubIcon />,   label: "GitHub" },
-  linkedin:  { icon: <LinkedinIcon />, label: "LinkedIn" },
-  twitter:   { icon: <TwitterIcon />,  label: "Twitter" },
-  instagram: { icon: <InstaIcon />,    label: "Instagram" },
+  github:   { icon: <GithubIcon />,   label: "GitHub" },
+  linkedin: { icon: <LinkedinIcon />, label: "LinkedIn" },
 };
 
 /* ─────────────────────────────────────────────
@@ -421,6 +419,7 @@ export default function App() {
                 <p className="bio">{profile.bio}</p>
                 <div className="meta-row">
                   {profile.location && <span><MapPinIcon /> {profile.location}</span>}
+                  {profile.phone    && <a href={`tel:${profile.phone}`}><PhoneIcon /> {profile.phone}</a>}
                   {profile.email    && <a href={`mailto:${profile.email}`}><MailIcon /> {profile.email}</a>}
                   {profile.website  && (
                     <a href={profile.website} target="_blank" rel="noreferrer">
@@ -528,13 +527,12 @@ export default function App() {
             <h2 className="page-title">Get in touch</h2>
             <div className="contact-grid">
               {[
-                { label: "Email",       icon: <MailIcon />,     href: `mailto:${profile.email}`,  value: profile.email },
-                { label: "GitHub",      icon: <GithubIcon />,   href: profile.social?.github,     value: "Liki19-HJ-dot" },
-                { label: "LinkedIn",    icon: <LinkedinIcon />, href: profile.social?.linkedin,   value: "likhith-h-j" },
-                { label: "Twitter / X", icon: <TwitterIcon />,  href: profile.social?.twitter,    value: "@LikhithHJ19" },
-                { label: "Instagram",   icon: <InstaIcon />,    href: profile.social?.instagram,  value: "@likhith_jlv" },
-                { label: "Portfolio",   icon: <GlobeIcon />,    href: profile.website,            value: profile.website?.replace(/https?:\/\//, "") },
-                { label: "Location",    icon: <MapPinIcon />,   href: null,                       value: profile.location },
+                { label: "Phone",     icon: <PhoneIcon />,    href: `tel:${profile.phone}`,     value: profile.phone },
+                { label: "Email",     icon: <MailIcon />,     href: `mailto:${profile.email}`,  value: profile.email },
+                { label: "GitHub",    icon: <GithubIcon />,   href: profile.social?.github,     value: "Liki19-HJ-dot" },
+                { label: "LinkedIn",  icon: <LinkedinIcon />, href: profile.social?.linkedin,   value: "likhith-h-j" },
+                { label: "Portfolio", icon: <GlobeIcon />,    href: profile.website,            value: profile.website?.replace(/https?:\/\//, "") },
+                { label: "Location",  icon: <MapPinIcon />,   href: null,                       value: profile.location },
               ].filter((c) => c.value).map((c) => (
                 <div key={c.label} className="contact-card">
                   <div className="contact-label">{c.icon}<span>{c.label}</span></div>
@@ -566,8 +564,7 @@ export default function App() {
           <p className="section-label">SOCIAL LINKS</p>
           <Field label="GitHub"    value={dp.social?.github    || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, github:    v } }))} />
           <Field label="LinkedIn"  value={dp.social?.linkedin  || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, linkedin:  v } }))} />
-          <Field label="Twitter/X" value={dp.social?.twitter   || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, twitter:   v } }))} />
-          <Field label="Instagram" value={dp.social?.instagram || ""} onChange={(v) => setDp((p) => ({ ...p, social: { ...p.social, instagram: v } }))} />
+          <Field label="Phone" value={dp.phone || ""} onChange={(v) => setDp((p) => ({ ...p, phone: v }))} placeholder="+91 XXXXXXXXXX" />
           <hr className="divider" />
           <p className="section-label">SKILLS (comma separated)</p>
           <Field
